@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1 - 2026-02-27
+
+### Fixed
+
+- Main menu prompt now correctly says "Press 1 for keyboard" instead of "Press a key"
+- Suppressed control scheme tooltip ("alternate movements rotate camera...") from being announced on main menu transition
+
 ## 1.0.0 - 2026-02-27
 
 Initial release.
