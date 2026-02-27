@@ -148,7 +148,7 @@ namespace CryptmasterAccess
             _strings["interact_npc"] = "{0}. Type {1} to talk";
 
             // ===== MENUS =====
-            _strings["menu_main_input"] = "Main menu. Press a key for keyboard, or Start for controller.";
+            _strings["menu_main_input"] = "Main menu. Press 1 for keyboard, or Start for controller.";
             _strings["menu_main"] = "Main menu";
             _strings["menu_exit"] = "Pause menu";
             _strings["menu_options"] = "Settings";

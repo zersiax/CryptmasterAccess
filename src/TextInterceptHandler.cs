@@ -132,6 +132,13 @@ namespace CryptmasterAccess
         {
             if (_tooltip == null) return;
 
+            // Suppress tooltip announcements on main menu (control scheme display is visual-only)
+            if (_gameManager.MainGameState == 0)
+            {
+                _lastTooltipIndex = _tooltip.currentTooltip;
+                return;
+            }
+
             int currentIndex = _tooltip.currentTooltip;
 
             if (currentIndex >= 0 && currentIndex < _tooltip.allToolTips.Count)

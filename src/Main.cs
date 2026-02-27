@@ -18,7 +18,7 @@ using HarmonyLib;
 //   See docs/technical-reference.md section "CRITICAL: Accessing Game Code"
 // ============================================================================
 
-[assembly: MelonInfo(typeof(CryptmasterAccess.Main), "CryptmasterAccess", "1.0.0", "Zersiax")]
+[assembly: MelonInfo(typeof(CryptmasterAccess.Main), "CryptmasterAccess", "1.0.1", "Zersiax")]
 [assembly: MelonGame("PaulHartandLeeWilliams", "CryptMaster")]
 
 namespace CryptmasterAccess
