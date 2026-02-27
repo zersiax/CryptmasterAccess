@@ -1,6 +1,14 @@
 # Changelog
 
-## 1.0.1 - 2026-02-27
+## 1.1.0 - 2026-02-27
+
+### Added
+
+- Auto-walk to nearest unexplored room (Ctrl+F9): automatically rotates and walks the player to the closest unvisited room. Any key press cancels immediately.
+- Exits in the navigation category now show "Visited" or "New" status for the room beyond each exit
+- Removed per-step "Moved ahead" announcement (was distracting)
+- Pathfinder scan range increased from 50 to 100 steps
+- Decorative objects (floormist, hanginglight, flycamera) separated into their own "Scenery" navigation category instead of cluttering Interactables
 
 ### Fixed
 

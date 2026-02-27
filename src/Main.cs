@@ -18,7 +18,7 @@ using HarmonyLib;
 //   See docs/technical-reference.md section "CRITICAL: Accessing Game Code"
 // ============================================================================
 
-[assembly: MelonInfo(typeof(CryptmasterAccess.Main), "CryptmasterAccess", "1.0.1", "Zersiax")]
+[assembly: MelonInfo(typeof(CryptmasterAccess.Main), "CryptmasterAccess", "1.1.0", "Zersiax")]
 [assembly: MelonGame("PaulHartandLeeWilliams", "CryptMaster")]
 
 namespace CryptmasterAccess
@@ -249,7 +249,16 @@ namespace CryptmasterAccess
 
             if (Input.GetKeyDown(KeyCode.F9))
             {
-                _textInterceptHandler.RepeatLastNotification();
+                bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+                if (ctrl)
+                {
+                    DebugLogger.LogInput("Ctrl+F9", "Auto-walk to unexplored");
+                    _pathfindHandler.AutoWalkToUnexplored();
+                }
+                else
+                {
+                    _textInterceptHandler.RepeatLastNotification();
+                }
                 return true;
             }
 
