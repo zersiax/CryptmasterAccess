@@ -72,7 +72,7 @@ namespace CryptmasterAccess
         {
             // ===== GENERAL =====
             _strings["mod_loaded"] = "Cryptmaster Access loaded. F1 for help.";
-            _strings["help_text"] = "Key bindings: F1 Help. F2 Repeat room info. F3 Repeat menu info. F4 Repeat combat. F5 Party HP. F6 Turn timer. F7 Enemy info. F8 Repeat inventory or brain info. F9 Repeat last notification. F10 Pathfind, cycle targets, Enter for route. Shift+F10 Toggle GPS. Ctrl+F10 Retrace to junction. Ctrl+PgUp/PgDn cycle categories. PgUp/PgDn cycle items. End for directions. F11 Toggle debug mode.";
+            _strings["help_text"] = "Key bindings: F1 Help. F2 Repeat room info. F3 Repeat menu info. F4 Repeat combat. F5 Party HP. F6 Turn timer. F7 Enemy info. F8 Repeat inventory or brain info. F9 Repeat last notification. Ctrl+F9 Auto-walk to nearest unexplored room. F10 Pathfind, cycle targets, Enter for route. Shift+F10 Toggle GPS. Ctrl+F10 Retrace to junction. Ctrl+PgUp/PgDn cycle categories. PgUp/PgDn cycle items. End for directions. F11 Toggle debug mode.";
             _strings["debug_toggle"] = "Debug mode {0}";
 
             // ===== DIRECTIONS (RELATIVE) =====
@@ -228,6 +228,11 @@ namespace CryptmasterAccess
             _strings["path_turn_left"] = "turn left";
             _strings["path_turn_right"] = "turn right";
             _strings["path_turn_around"] = "turn around";
+            _strings["path_no_unexplored"] = "No unexplored rooms reachable.";
+            _strings["path_autowalk_start"] = "Auto-walking {0} steps.";
+            _strings["path_autowalk_cancelled"] = "Auto-walk cancelled.";
+            _strings["path_autowalk_blocked"] = "Auto-walk blocked.";
+            _strings["path_autowalk_arrived"] = "Auto-walk complete.";
 
             // ===== TEXT INTERCEPT =====
             _strings["text_subtitle"] = "{0}";

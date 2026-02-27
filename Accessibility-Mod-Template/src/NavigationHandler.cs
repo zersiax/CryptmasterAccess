@@ -308,9 +308,13 @@ namespace CryptmasterAccess
                 string dirName = DirectionHelper.GetRelativeName(relDir);
                 MapPiece exitPiece = DirectionHelper.GetAdjacentPiece(currentPiece, exit.AbsoluteDirection);
 
+                string visitedTag = Main.PathfindHandlerInstance != null && Main.PathfindHandlerInstance.IsVisited(exitPiece)
+                    ? Loc.Get("path_room_visited")
+                    : Loc.Get("path_room_new");
+
                 _cachedItems[NavCategory.Exits].Add(new NavItem
                 {
-                    Name = Loc.Get("nav_exit_item", dirName),
+                    Name = Loc.Get("nav_exit_item", dirName) + ", " + visitedTag,
                     TypeKey = "nav_cat_exits",
                     AbsoluteDirection = exit.AbsoluteDirection,
                     Distance = 1,

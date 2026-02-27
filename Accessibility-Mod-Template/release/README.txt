@@ -1,5 +1,5 @@
 CryptmasterAccess - Accessibility Mod for Cryptmaster
-Version: 1.0.0
+Version: 1.1.0
 Author: Zersiax (Florian Beijers)
 
 WHAT THIS MOD DOES
@@ -12,7 +12,9 @@ Makes Cryptmaster playable with a screen reader (NVDA, JAWS).
 - NPC subtitles and game notifications routed to screen reader
 - Pathfinding: find routes to NPCs, containers, shops, and more
 - GPS mode: step-by-step navigation with automatic recalculation
+- Auto-walk to nearest unexplored room
 - Visited/new room tracking
+- Scenery separated from interactable objects
 
 REQUIREMENTS
 ============
@@ -41,6 +43,7 @@ F6:           Turn timer
 F7:           Enemy info
 F8:           Repeat inventory or brain info
 F9:           Repeat last notification
+Ctrl+F9:      Auto-walk to nearest unexplored room (any key cancels)
 F10:          Pathfind - scan for targets, press again to cycle, Enter for route
 Shift+F10:    Toggle GPS mode (step-by-step navigation)
 Ctrl+F10:     Retrace to last junction

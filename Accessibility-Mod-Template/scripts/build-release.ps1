@@ -46,8 +46,13 @@ Copy-Item $DllSource (Join-Path $StagingDir "Mods\CryptmasterAccess.dll")
 Copy-Item (Join-Path $GameDir "Tolk.dll") $StagingDir
 Copy-Item (Join-Path $GameDir "nvdaControllerClient64.dll") $StagingDir
 
-# Copy README
+# Copy README and docs
 Copy-Item (Join-Path $ReleaseDir "README.txt") $StagingDir
+$DocsDir = Join-Path $StagingDir "docs"
+New-Item -ItemType Directory -Path $DocsDir -Force | Out-Null
+Copy-Item (Join-Path $ProjectRoot "docs\*.md") $DocsDir
+Copy-Item (Join-Path $ProjectRoot "CHANGELOG.md") $StagingDir
+Copy-Item (Join-Path $ProjectRoot "LICENSE") $StagingDir
 
 Write-Host "Staging directory contents:"
 Get-ChildItem $StagingDir -Recurse | ForEach-Object {

@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using MelonLoader;
 using UnityEngine;
 
 namespace CryptmasterAccess
@@ -8,6 +10,7 @@ namespace CryptmasterAccess
     /// GPS-guided navigation, and breadcrumb backtracking.
     ///
     /// Controls:
+    ///   Ctrl+F9      — Auto-walk to nearest unexplored room
     ///   F10          — Scan/cycle targets, Enter to get route
     ///   Shift+F10    — Toggle GPS mode
     ///   Ctrl+F10     — Retrace to last junction
@@ -50,6 +53,10 @@ namespace CryptmasterAccess
         private readonly List<MapPiece> _breadcrumbs = new List<MapPiece>();
         private MapPiece _lastJunction;
 
+        // Auto-walk
+        private bool _autoWalking;
+        private bool _autoWalkCancelRequested;
+
         // Repeat
         private string _lastAnnouncement = "";
 
@@ -89,6 +96,13 @@ namespace CryptmasterAccess
             {
                 OnPlayerMoved(currentPiece);
                 _lastMapPiece = currentPiece;
+            }
+
+            // Cancel auto-walk on any key press
+            if (_autoWalking && Input.anyKeyDown)
+            {
+                _autoWalkCancelRequested = true;
+                return;
             }
 
             // Enter key while target selection is active — get route
@@ -200,6 +214,8 @@ namespace CryptmasterAccess
             _routeTargetPiece = null;
             _routeTargetName = null;
             _gpsActive = false;
+            _autoWalking = false;
+            _autoWalkCancelRequested = true;
             _breadcrumbs.Clear();
             _visitedRooms.Clear();
             _lastJunction = null;
@@ -484,6 +500,180 @@ namespace CryptmasterAccess
                     count++;
             }
             return count;
+        }
+
+        #endregion
+
+        #region Auto-Walk
+
+        /// <summary>
+        /// Starts auto-walking to the nearest unvisited room (Ctrl+F9).
+        /// </summary>
+        public void AutoWalkToUnexplored()
+        {
+            if (_gameManager == null) return;
+
+            if (_autoWalking)
+            {
+                _autoWalkCancelRequested = true;
+                return;
+            }
+
+            MapPiece currentPiece = _gameManager.myCurrentMapPiece;
+            if (currentPiece == null) return;
+
+            // Find nearest unvisited room
+            MapPiece target = FindNearestUnvisited(currentPiece);
+            if (target == null)
+            {
+                Announce(Loc.Get("path_no_unexplored"));
+                return;
+            }
+
+            List<int> path = _pathfinder.FindPath(currentPiece, target, _gameManager, _scanner);
+            if (path == null || path.Count == 0)
+            {
+                Announce(Loc.Get("path_no_route"));
+                return;
+            }
+
+            Announce(Loc.Get("path_autowalk_start", path.Count));
+            MelonCoroutines.Start(AutoWalkCoroutine(path));
+        }
+
+        /// <summary>
+        /// BFS to find the nearest unvisited, reachable room.
+        /// </summary>
+        private MapPiece FindNearestUnvisited(MapPiece start)
+        {
+            var visited = new HashSet<MapPiece>();
+            var queue = new Queue<MapPiece>();
+
+            visited.Add(start);
+            queue.Enqueue(start);
+
+            while (queue.Count > 0)
+            {
+                MapPiece current = queue.Dequeue();
+
+                for (int dir = 0; dir < 4; dir++)
+                {
+                    MapPiece next = DirectionHelper.GetAdjacentPiece(current, dir);
+                    if (next == null || visited.Contains(next)) continue;
+
+                    if (_scanner.IsDirectionBlocked(current, next, dir, _gameManager))
+                        continue;
+
+                    // Skip rooms with alive enemies (can't walk through)
+                    if (next.myMapEnemy != null && !next.myMapEnemy.isDead)
+                        continue;
+
+                    visited.Add(next);
+
+                    // Found an unvisited room
+                    if (!_visitedRooms.Contains(next))
+                        return next;
+
+                    queue.Enqueue(next);
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Coroutine that walks the player along a path by calling game movement methods.
+        /// Cancels on any key press.
+        /// </summary>
+        private IEnumerator AutoWalkCoroutine(List<int> path)
+        {
+            _autoWalking = true;
+            _autoWalkCancelRequested = false;
+
+            for (int i = 0; i < path.Count; i++)
+            {
+                if (_autoWalkCancelRequested || _gameManager == null)
+                {
+                    Announce(Loc.Get("path_autowalk_cancelled"));
+                    break;
+                }
+
+                int targetDir = path[i];
+                int currentFacing = _gameManager.lookDirection;
+
+                // Rotate to face the correct direction
+                int relDir = DirectionHelper.AbsoluteToRelative(targetDir, currentFacing);
+
+                if (relDir == 1) // need to turn right
+                {
+                    _gameManager.RotateRight();
+                    yield return new WaitForSeconds(0.2f);
+                }
+                else if (relDir == 3) // need to turn left
+                {
+                    _gameManager.RotateLeft();
+                    yield return new WaitForSeconds(0.2f);
+                }
+                else if (relDir == 2) // need to turn around
+                {
+                    _gameManager.RotateRight();
+                    yield return new WaitForSeconds(0.2f);
+                    if (_autoWalkCancelRequested) break;
+                    _gameManager.RotateRight();
+                    yield return new WaitForSeconds(0.2f);
+                }
+                // relDir == 0: already facing ahead
+
+                if (_autoWalkCancelRequested) break;
+
+                // Wait until the game is ready for movement
+                float waitTimer = 0f;
+                while (!_gameManager.isAtTarget && waitTimer < 3f)
+                {
+                    yield return null;
+                    waitTimer += Time.deltaTime;
+                }
+
+                if (_autoWalkCancelRequested) break;
+
+                // Move forward
+                MapPiece beforeMove = _gameManager.myCurrentMapPiece;
+                _gameManager.ProcessCenterClick();
+
+                // Wait for movement to complete (position changes)
+                waitTimer = 0f;
+                while (_gameManager.myCurrentMapPiece == beforeMove && waitTimer < 3f)
+                {
+                    yield return null;
+                    waitTimer += Time.deltaTime;
+                }
+
+                if (_gameManager.myCurrentMapPiece == beforeMove)
+                {
+                    // Movement didn't happen — blocked
+                    Announce(Loc.Get("path_autowalk_blocked"));
+                    break;
+                }
+
+                // Wait for isAtTarget to settle
+                waitTimer = 0f;
+                while (!_gameManager.isAtTarget && waitTimer < 3f)
+                {
+                    yield return null;
+                    waitTimer += Time.deltaTime;
+                }
+
+                // Small delay between steps for stability
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            if (!_autoWalkCancelRequested && _gameManager != null)
+            {
+                Announce(Loc.Get("path_autowalk_arrived"));
+            }
+
+            _autoWalking = false;
+            _autoWalkCancelRequested = false;
         }
 
         #endregion
