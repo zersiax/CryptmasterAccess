@@ -1,5 +1,5 @@
 CryptmasterAccess - Accessibility Mod for Cryptmaster
-Version: 1.2.0
+Version: 1.3.0
 Author: Zersiax (Florian Beijers)
 
 WHAT THIS MOD DOES
@@ -14,6 +14,7 @@ Makes Cryptmaster playable with a screen reader (NVDA, JAWS).
 - GPS mode: step-by-step navigation with automatic recalculation
 - Auto-walk to nearest unexplored room
 - Visited/new room tracking
+- Word puzzle accessibility: hear letter count, revealed/blank positions, auto-updates
 - Scenery separated from interactable objects
 
 REQUIREMENTS
@@ -36,6 +37,7 @@ CONTROLS
 ========
 F1:           Help (lists all bindings)
 F2:           Repeat room info
+Ctrl+F2:      Repeat word puzzle state (letter count + revealed/blank)
 F3:           Repeat menu info
 F4:           Repeat last combat announcement
 F5:           Party HP status

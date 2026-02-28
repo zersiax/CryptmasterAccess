@@ -473,11 +473,12 @@ namespace CryptmasterAccess
                 }
                 else
                 {
-                    // Non-main menu items: combine myText + outerText
+                    // Non-main menu items: myText has first letter, outerText has the rest
+                    // Concatenate without space to form the full word (e.g. "r" + "ealtime" = "realtime")
                     string inner = backer.myText != null ? backer.myText.text : "";
                     string outer = backer.outerText != null ? backer.outerText.text : "";
 
-                    string combined = (inner + " " + outer).Trim();
+                    string combined = (inner + outer).Trim();
                     if (!string.IsNullOrEmpty(combined))
                         return combined;
                 }

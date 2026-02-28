@@ -72,7 +72,7 @@ namespace CryptmasterAccess
         {
             // ===== GENERAL =====
             _strings["mod_loaded"] = "Cryptmaster Access loaded. F1 for help.";
-            _strings["help_text"] = "Key bindings: F1 Help. F2 Repeat room info. F3 Repeat menu info. F4 Repeat combat. F5 Party HP. F6 Turn timer. F7 Enemy info. F8 Repeat inventory or brain info. F9 Repeat last notification. Ctrl+F9 Auto-walk to nearest unexplored room. F10 Pathfind, cycle targets, Enter for route. Shift+F10 Toggle GPS. Ctrl+F10 Retrace to junction. Ctrl+PgUp/PgDn cycle categories. PgUp/PgDn cycle items. End for directions. F11 Toggle debug mode.";
+            _strings["help_text"] = "Key bindings: F1 Help. F2 Repeat room info. Ctrl+F2 Repeat word puzzle. F3 Repeat menu info. F4 Repeat combat. F5 Party HP. F6 Turn timer. F7 Enemy info. F8 Repeat inventory or brain info. F9 Repeat last notification. Ctrl+F9 Auto-walk to nearest unexplored room. F10 Pathfind, cycle targets, Enter for route. Shift+F10 Toggle GPS. Ctrl+F10 Retrace to junction. Ctrl+PgUp/PgDn cycle categories. PgUp/PgDn cycle items. End for directions. F11 Toggle debug mode.";
             _strings["debug_toggle"] = "Debug mode {0}";
 
             // ===== DIRECTIONS (RELATIVE) =====
@@ -240,6 +240,15 @@ namespace CryptmasterAccess
             _strings["path_autowalk_cancelled"] = "Auto-walk cancelled.";
             _strings["path_autowalk_blocked"] = "Auto-walk blocked.";
             _strings["path_autowalk_arrived"] = "Auto-walk complete.";
+
+            // ===== WORD PUZZLE =====
+            _strings["word_puzzle_start"] = "Word puzzle, {0} letters.";
+            _strings["word_puzzle_letters"] = "{0} letters. {1}";
+            _strings["word_puzzle_solved"] = "Word solved.";
+            _strings["word_puzzle_blank"] = "blank";
+            _strings["word_puzzle_no_active"] = "No word puzzle.";
+            _strings["word_world_start"] = "World word, {0} letters.";
+            _strings["word_world_solved"] = "World word solved.";
 
             // ===== TEXT INTERCEPT =====
             _strings["text_subtitle"] = "{0}";
