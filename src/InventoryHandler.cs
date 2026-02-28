@@ -134,6 +134,9 @@ namespace CryptmasterAccess
             _lastTabIndex = _inventory.currentShopItemY;
             _lastItemIndex = _inventory.currentShopItemX;
             _wasPotioning = false;
+
+            // Announce the first selected item (queued so tab name isn't interrupted)
+            AnnounceCurrentItemQueued();
         }
 
         /// <summary>
@@ -169,6 +172,9 @@ namespace CryptmasterAccess
 
             // Reset item index tracking for the new tab
             _lastItemIndex = _inventory.currentShopItemX;
+
+            // Announce the first selected item on the new tab (queued so tab name isn't interrupted)
+            AnnounceCurrentItemQueued();
         }
 
         /// <summary>
@@ -211,13 +217,30 @@ namespace CryptmasterAccess
         /// </summary>
         private void AnnounceCurrentItem()
         {
+            AnnounceCurrentItemInternal(queued: false);
+        }
+
+        /// <summary>
+        /// Announces the currently highlighted item queued (doesn't interrupt previous speech).
+        /// Used after tab announcements so the tab name isn't cut off.
+        /// </summary>
+        private void AnnounceCurrentItemQueued()
+        {
+            AnnounceCurrentItemInternal(queued: true);
+        }
+
+        /// <summary>
+        /// Internal item announcement with optional queuing.
+        /// </summary>
+        private void AnnounceCurrentItemInternal(bool queued)
+        {
             var scroll = _inventory.currentInventoryScroll;
             if (scroll == null) return;
 
             var container = scroll.currentShopContainer;
             if (container == null)
             {
-                Announce(Loc.Get("inv_no_items"));
+                AnnounceItem(Loc.Get("inv_no_items"), queued);
                 return;
             }
 
@@ -234,7 +257,7 @@ namespace CryptmasterAccess
             {
                 string msg = Loc.Get("inv_item_new", itemName, position, total);
                 DebugLogger.Log(LogCategory.Handler, "InventoryHandler", $"New item: {itemName}");
-                Announce(msg);
+                AnnounceItem(msg, queued);
                 return;
             }
 
@@ -243,7 +266,7 @@ namespace CryptmasterAccess
             {
                 string msg = Loc.Get("inv_item_usable", itemName, collectable.castContext, position, total);
                 DebugLogger.Log(LogCategory.Handler, "InventoryHandler", $"Usable item: {itemName}, {collectable.castContext}");
-                Announce(msg);
+                AnnounceItem(msg, queued);
                 return;
             }
 
@@ -252,7 +275,7 @@ namespace CryptmasterAccess
             {
                 string msg = Loc.Get("inv_item_quantity", itemName, collectable.ingredientCount, position, total);
                 DebugLogger.Log(LogCategory.Handler, "InventoryHandler", $"Ingredient: {itemName} x{collectable.ingredientCount}");
-                Announce(msg);
+                AnnounceItem(msg, queued);
                 return;
             }
 
@@ -261,13 +284,13 @@ namespace CryptmasterAccess
             {
                 string msg = Loc.Get("inv_item_desc", itemName, position, total, description);
                 DebugLogger.Log(LogCategory.Handler, "InventoryHandler", $"Item: {itemName}, {position}/{total}");
-                Announce(msg);
+                AnnounceItem(msg, queued);
             }
             else
             {
                 string msg = Loc.Get("inv_item", itemName, position, total);
                 DebugLogger.Log(LogCategory.Handler, "InventoryHandler", $"Item: {itemName}, {position}/{total}");
-                Announce(msg);
+                AnnounceItem(msg, queued);
             }
         }
 
@@ -323,6 +346,19 @@ namespace CryptmasterAccess
         {
             _lastAnnouncement = text;
             ScreenReader.Say(text);
+        }
+
+        /// <summary>
+        /// Announces an item with optional queuing (non-interrupting speech).
+        /// Used to avoid cutting off tab announcements when items follow immediately.
+        /// </summary>
+        private void AnnounceItem(string text, bool queued)
+        {
+            _lastAnnouncement = text;
+            if (queued)
+                ScreenReader.SayQueued(text);
+            else
+                ScreenReader.Say(text);
         }
 
         #endregion

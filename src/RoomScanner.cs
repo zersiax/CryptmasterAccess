@@ -76,7 +76,8 @@ namespace CryptmasterAccess
             }
 
             // Container in current room
-            if (currentPiece.myCollectionContainer != null && !currentPiece.myCollectionContainer.hasOpened)
+            if (currentPiece.myCollectionContainer != null && !currentPiece.myCollectionContainer.hasOpened
+                && currentPiece.myCollectionContainer.gameObject.activeInHierarchy)
             {
                 if (IsInteractableContainer(currentPiece.myCollectionContainer))
                     contents.Add(Loc.Get("room_container"));
@@ -216,8 +217,9 @@ namespace CryptmasterAccess
                 });
             }
 
-            // Container (unopened) — separate interactive from scenery
-            if (piece.myCollectionContainer != null && !piece.myCollectionContainer.hasOpened)
+            // Container (unopened and still active in scene) — separate interactive from scenery
+            if (piece.myCollectionContainer != null && !piece.myCollectionContainer.hasOpened
+                && piece.myCollectionContainer.gameObject.activeInHierarchy)
             {
                 if (IsInteractableContainer(piece.myCollectionContainer))
                 {

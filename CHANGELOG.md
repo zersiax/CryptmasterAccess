@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2.0 - 2026-02-28
+
+### Added
+
+- Post-battle loot screen announcements: hear which letters are assigned to which characters, cursor movement, and level-up letter selection
+- Level transition doors now appear as pathfinding targets ("Door, N steps") so players can discover area exits via F10
+- Improved "no targets" messages to clarify that pathfinding is scoped to the current area
+
+### Fixed
+
+- Enemy HP now displays correctly (was showing visual letter count ~100 instead of actual HP ~10-15)
+- Soulstone and other collected containers no longer reported by the object tracker after pickup
+- Inventory items now properly announced when navigating (first item and single-item tabs were silent)
+- Inventory tab name no longer cut off by the immediately following item announcement (now queued)
+- Visited room markers no longer reset when transitioning through doors (persists for the session)
+- Pathfinder container detection now checks object is still active in scene
+
 ## 1.1.0 - 2026-02-27
 
 ### Added

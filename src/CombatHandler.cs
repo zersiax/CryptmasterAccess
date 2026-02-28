@@ -24,6 +24,11 @@ namespace CryptmasterAccess
         private string _lastEnemyName;
         private string _lastAnnouncement;
 
+        // Loot/level-up state
+        private bool _wasLooting;
+        private bool _wasLevelingUp;
+        private int _lastLootHover;
+
         #endregion
 
         #region Public Methods
@@ -52,6 +57,7 @@ namespace CryptmasterAccess
             if (_gameManager == null) return;
 
             PollCombatState();
+            PollLootState();
         }
 
         /// <summary>
@@ -67,6 +73,9 @@ namespace CryptmasterAccess
             _lastTimerThreshold = 0;
             _lastEnemyName = null;
             _lastAnnouncement = null;
+            _wasLooting = false;
+            _wasLevelingUp = false;
+            _lastLootHover = -1;
             for (int i = 0; i < 4; i++)
                 _wasCharDead[i] = false;
 
@@ -121,10 +130,11 @@ namespace CryptmasterAccess
 
             string name = enemy.enemyName ?? "Unknown";
             int hp = GetEnemyHP(enemy);
+            int maxHp = GetEnemyMaxHP(enemy);
             int attack = GetEnemyAttack(enemy);
             string targeting = GetTargetingInfo();
 
-            Announce(Loc.Get("combat_enemy_info", name, hp, attack, targeting));
+            Announce(Loc.Get("combat_enemy_info", name, hp, maxHp, attack, targeting));
         }
 
         /// <summary>
@@ -183,7 +193,11 @@ namespace CryptmasterAccess
         /// </summary>
         public void OnEnemyDamaged(int currentHealth, int damage)
         {
-            string msg = Loc.Get("combat_enemy_damaged", damage, currentHealth);
+            int maxHp = 0;
+            Enemy enemy = _gameManager != null ? _gameManager.currentlyLoadedEnemy : null;
+            if (enemy != null) maxHp = GetEnemyMaxHP(enemy);
+
+            string msg = Loc.Get("combat_enemy_damaged", damage, currentHealth, maxHp);
             DebugLogger.Log(LogCategory.Handler, "CombatHandler", $"Enemy damaged: {msg}");
             _lastAnnouncement = msg;
             ScreenReader.Say(msg);
@@ -442,21 +456,21 @@ namespace CryptmasterAccess
         }
 
         /// <summary>
-        /// Gets enemy HP from active letters count on GameManager.
+        /// Gets enemy current HP from Enemy.currentHealth (not letter count, which is visual only).
         /// </summary>
         private int GetEnemyHP(Enemy enemy)
         {
-            if (_gameManager == null) return 0;
+            if (enemy == null) return 0;
+            return Mathf.Max(0, (int)enemy.currentHealth);
+        }
 
-            int hp = 0;
-            if (_gameManager.allEnemyLettersActive != null)
-            {
-                foreach (var letter in _gameManager.allEnemyLettersActive)
-                {
-                    if (letter != null && letter.isActive) hp++;
-                }
-            }
-            return hp;
+        /// <summary>
+        /// Gets enemy max HP from Enemy.totalHealth.
+        /// </summary>
+        private int GetEnemyMaxHP(Enemy enemy)
+        {
+            if (enemy == null) return 0;
+            return (int)enemy.totalHealth;
         }
 
         /// <summary>
@@ -498,6 +512,139 @@ namespace CryptmasterAccess
         {
             _lastAnnouncement = text;
             ScreenReader.Say(text);
+        }
+
+        /// <summary>
+        /// Polls loot and level-up screen state.
+        /// Loot: enemy drops letters, party members each pick one.
+        /// Level-up: one character picks a letter from A-Z.
+        /// </summary>
+        private void PollLootState()
+        {
+            bool isLooting = _gameManager.isLooting;
+            bool isLevelingUp = _gameManager.isLevelingUp;
+
+            // Loot start
+            if (isLooting && !_wasLooting)
+            {
+                _lastLootHover = _gameManager.currentHover;
+                string assignments = BuildLootAssignments();
+                string msg = Loc.Get("loot_start", assignments);
+                DebugLogger.Log(LogCategory.Handler, "CombatHandler", $"Loot started: {assignments}");
+                Announce(msg);
+            }
+            // Loot end
+            else if (!isLooting && _wasLooting)
+            {
+                DebugLogger.Log(LogCategory.Handler, "CombatHandler", "Loot ended");
+                _lastLootHover = -1;
+            }
+
+            // Level-up start
+            if (isLevelingUp && !_wasLevelingUp)
+            {
+                _lastLootHover = _gameManager.currentHover;
+                string charName = _gameManager.storedLevelUpChar != null
+                    ? GetCharacterName(_gameManager.storedLevelUpChar)
+                    : "Unknown";
+                string letter = GetLootLetterAt(_gameManager.currentHover);
+                string msg = Loc.Get("loot_levelup_start", charName, letter);
+                DebugLogger.Log(LogCategory.Handler, "CombatHandler", $"Level-up: {charName}, letter {letter}");
+                Announce(msg);
+            }
+            // Level-up end
+            else if (!isLevelingUp && _wasLevelingUp)
+            {
+                DebugLogger.Log(LogCategory.Handler, "CombatHandler", "Level-up ended");
+                _lastLootHover = -1;
+            }
+
+            // Hover change while looting or leveling up
+            if ((isLooting || isLevelingUp) && _gameManager.currentHover != _lastLootHover)
+            {
+                _lastLootHover = _gameManager.currentHover;
+
+                if (isLooting)
+                {
+                    string assignments = BuildLootAssignments();
+                    Announce(assignments);
+                }
+                else
+                {
+                    string letter = GetLootLetterAt(_gameManager.currentHover);
+                    Announce(Loc.Get("loot_levelup_letter", letter));
+                }
+            }
+
+            _wasLooting = isLooting;
+            _wasLevelingUp = isLevelingUp;
+        }
+
+        /// <summary>
+        /// Builds a string showing which letter each active party member would get.
+        /// E.g. "Joro gets S, Syn gets K, Bor gets E"
+        /// </summary>
+        private string BuildLootAssignments()
+        {
+            var sb = new StringBuilder();
+            var letters = _gameManager.myTextManager.allLootLetters;
+            if (letters == null || letters.Count == 0) return "";
+
+            int hover = _gameManager.currentHover;
+            int fingerIndex = 0;
+
+            foreach (var finger in _gameManager.allFingers)
+            {
+                if (!finger.isActive) continue;
+
+                int letterIdx = Mathf.Clamp(hover + fingerIndex, 0, letters.Count - 1);
+                var letter = letters[letterIdx];
+                string ch = letter != null ? letter.storedChar : "?";
+
+                // Find which character this finger belongs to
+                string charName = GetFingerCharacterName(fingerIndex);
+
+                if (sb.Length > 0) sb.Append(", ");
+                sb.Append(Loc.Get("loot_assignment", charName, ch.ToUpper()));
+                fingerIndex++;
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Gets the letter at the given index in allLootLetters.
+        /// </summary>
+        private string GetLootLetterAt(int index)
+        {
+            var letters = _gameManager.myTextManager.allLootLetters;
+            if (letters == null || letters.Count == 0) return "?";
+
+            int clamped = Mathf.Clamp(index, 0, letters.Count - 1);
+            var letter = letters[clamped];
+            return letter != null ? letter.storedChar.ToUpper() : "?";
+        }
+
+        /// <summary>
+        /// Gets the character name for a given finger index (0-based among active party members).
+        /// </summary>
+        private string GetFingerCharacterName(int activeIndex)
+        {
+            if (_gameManager.allCharacterUI == null) return "Unknown";
+
+            int count = 0;
+            for (int i = 0; i < _gameManager.allCharacterUI.Count && i < 4; i++)
+            {
+                CharacterHUD hud = _gameManager.allCharacterUI[i];
+                if (hud == null) continue;
+                if (hud.nameHP <= 0) continue; // Dead characters don't loot
+
+                if (count == activeIndex)
+                    return GetCharacterName(hud);
+                count++;
+            }
+
+            return "Unknown";
         }
 
         #endregion

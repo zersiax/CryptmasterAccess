@@ -30,8 +30,8 @@ namespace CryptmasterAccess
         private readonly RoomScanner _scanner = new RoomScanner();
         private readonly Pathfinder _pathfinder = new Pathfinder();
 
-        // Visited room tracking
-        private readonly HashSet<MapPiece> _visitedRooms = new HashSet<MapPiece>();
+        // Visited room tracking — uses string keys ("level:x,y,z") to survive object recreation
+        private readonly HashSet<string> _visitedRooms = new HashSet<string>();
 
         // Movement detection
         private MapPiece _lastMapPiece;
@@ -217,7 +217,7 @@ namespace CryptmasterAccess
             _autoWalking = false;
             _autoWalkCancelRequested = true;
             _breadcrumbs.Clear();
-            _visitedRooms.Clear();
+            // Note: _visitedRooms intentionally NOT cleared — persists across level transitions
             _lastJunction = null;
             _lastAnnouncement = "";
             DebugLogger.LogState("PathfindHandler reset");
@@ -229,7 +229,7 @@ namespace CryptmasterAccess
         /// </summary>
         public bool IsVisited(MapPiece piece)
         {
-            return piece != null && _visitedRooms.Contains(piece);
+            return piece != null && _visitedRooms.Contains(GetRoomKey(piece));
         }
 
         /// <summary>
@@ -465,7 +465,7 @@ namespace CryptmasterAccess
         {
             if (piece == null) return;
 
-            _visitedRooms.Add(piece);
+            _visitedRooms.Add(GetRoomKey(piece));
             _breadcrumbs.Add(piece);
 
             // Cap breadcrumb list
@@ -571,7 +571,7 @@ namespace CryptmasterAccess
                     visited.Add(next);
 
                     // Found an unvisited room
-                    if (!_visitedRooms.Contains(next))
+                    if (!_visitedRooms.Contains(GetRoomKey(next)))
                         return next;
 
                     queue.Enqueue(next);
@@ -687,6 +687,18 @@ namespace CryptmasterAccess
         {
             _lastAnnouncement = text;
             ScreenReader.Say(text);
+        }
+
+        /// <summary>
+        /// Creates a stable string key for a MapPiece based on level name and grid coordinates.
+        /// Survives object recreation across level transitions.
+        /// </summary>
+        private string GetRoomKey(MapPiece piece)
+        {
+            string level = _gameManager != null && _gameManager.currentLevelFile != null
+                ? _gameManager.currentLevelFile.levelName
+                : "unknown";
+            return $"{level}:{piece.xPos},{piece.yPos},{piece.zPos}";
         }
 
         #endregion
