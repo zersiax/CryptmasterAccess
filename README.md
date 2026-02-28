@@ -4,7 +4,7 @@ Accessibility mod for Cryptmaster -- makes the game playable with screen readers
 
 ## Status
 
-Version 1.0.0 -- all core features implemented. Covers menus, room exploration, combat, inventory, NPC text, and pathfinding.
+Version 1.3.0 -- all core features implemented. Covers menus, room exploration, combat, inventory, NPC text, pathfinding, and word puzzle accessibility.
 
 ## Features
 
@@ -13,6 +13,7 @@ Version 1.0.0 -- all core features implemented. Covers menus, room exploration, 
 - Combat: enemy info, spell casting, damage, party HP, turn timer
 - Inventory and brain/spell screen navigation
 - NPC subtitle and notification intercept
+- Word puzzle accessibility: letter count, revealed/blank positions, auto-updates on reveals
 - BFS pathfinding with GPS-guided navigation and breadcrumb backtracking
 - Visited/new room tracking
 - Category-based navigation (Exits, NPCs, Enemies, Interactables, Scenery)
@@ -33,6 +34,7 @@ Version 1.0.0 -- all core features implemented. Covers menus, room exploration, 
 
 - F1: Help (lists all key bindings)
 - F2: Repeat room info
+- Ctrl+F2: Repeat word puzzle state
 - F3: Repeat menu info
 - F4: Repeat last combat announcement
 - F5: Party HP status

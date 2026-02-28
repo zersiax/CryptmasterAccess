@@ -18,7 +18,7 @@ using HarmonyLib;
 //   See docs/technical-reference.md section "CRITICAL: Accessing Game Code"
 // ============================================================================
 
-[assembly: MelonInfo(typeof(CryptmasterAccess.Main), "CryptmasterAccess", "1.1.0", "Zersiax")]
+[assembly: MelonInfo(typeof(CryptmasterAccess.Main), "CryptmasterAccess", "1.3.0", "Zersiax")]
 [assembly: MelonGame("PaulHartandLeeWilliams", "CryptMaster")]
 
 namespace CryptmasterAccess
@@ -51,6 +51,7 @@ namespace CryptmasterAccess
         private BrainHandler _brainHandler;
         private TextInterceptHandler _textInterceptHandler;
         private PathfindHandler _pathfindHandler;
+        private WordPuzzleHandler _wordPuzzleHandler;
 
         /// <summary>
         /// Static reference for Harmony patch callbacks (room).
@@ -90,6 +91,7 @@ namespace CryptmasterAccess
             _brainHandler = new BrainHandler();
             _textInterceptHandler = new TextInterceptHandler();
             _pathfindHandler = new PathfindHandler();
+            _wordPuzzleHandler = new WordPuzzleHandler();
             RoomHandlerInstance = _roomHandler;
             CombatHandlerInstance = _combatHandler;
             PathfindHandlerInstance = _pathfindHandler;
@@ -132,6 +134,7 @@ namespace CryptmasterAccess
             _brainHandler.Reset();
             _textInterceptHandler.Reset();
             _pathfindHandler.Reset();
+            _wordPuzzleHandler.Reset();
             _patchesApplied = false;
             _cachedGameManager = null;
 
@@ -199,7 +202,15 @@ namespace CryptmasterAccess
 
             if (Input.GetKeyDown(KeyCode.F2))
             {
-                _roomHandler.RepeatLastAnnouncement();
+                bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+                if (ctrl)
+                {
+                    _wordPuzzleHandler.RepeatWordPuzzle();
+                }
+                else
+                {
+                    _roomHandler.RepeatLastAnnouncement();
+                }
                 return true;
             }
 
@@ -307,6 +318,7 @@ namespace CryptmasterAccess
                     _brainHandler.SetGameManager(_cachedGameManager);
                     _textInterceptHandler.SetGameManager(_cachedGameManager);
                     _pathfindHandler.SetGameManager(_cachedGameManager);
+                    _wordPuzzleHandler.SetGameManager(_cachedGameManager);
                 }
             }
 
@@ -319,6 +331,7 @@ namespace CryptmasterAccess
             _brainHandler.Update();
             _textInterceptHandler.Update();
             _pathfindHandler.Update();
+            _wordPuzzleHandler.Update();
 
             // Apply Harmony patches once GameManager is available
             if (!_patchesApplied && _cachedGameManager != null)

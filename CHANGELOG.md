@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.3.0 - 2026-02-28
+
+### Added
+
+- Word puzzle announcements: when opening a chest or encountering a world word, hear the total letter count and which letters are revealed vs blank
+- Automatic re-announcement when new letters are revealed after a wrong guess
+- Puzzle solved announcement when the word is completed
+- Ctrl+F2: repeat current word puzzle state at any time
+
+### Fixed
+
+- Menu items like "realtime" and "turnbased" no longer announced with a space after the first letter ("r ealtime" is now "realtime")
+
 ## 1.2.0 - 2026-02-28
 
 ### Added
