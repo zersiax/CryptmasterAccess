@@ -1,5 +1,5 @@
 CryptmasterAccess - Accessibility Mod for Cryptmaster
-Version: 1.1.0
+Version: 1.2.0
 Author: Zersiax (Florian Beijers)
 
 WHAT THIS MOD DOES

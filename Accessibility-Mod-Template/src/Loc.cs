@@ -119,6 +119,7 @@ namespace CryptmasterAccess
             _strings["poi_fishing"] = "Fishing";
             _strings["poi_cards"] = "Cards";
             _strings["poi_scenery"] = "Scenery";
+            _strings["poi_door"] = "Door";
             _strings["poi_named_format"] = "{0}: {1}, {2} {3}";
             _strings["poi_format"] = "{0}: {1} {2}";
 
@@ -165,12 +166,12 @@ namespace CryptmasterAccess
             // ===== COMBAT =====
             _strings["combat_start"] = "Combat! {0}, attack {1}. {2}";
             _strings["combat_end"] = "Combat over.";
-            _strings["combat_enemy_info"] = "{0}, {1} HP, attack {2}, targeting {3}";
+            _strings["combat_enemy_info"] = "{0}, {1} of {2} HP, attack {3}, targeting {4}";
             _strings["combat_not_in_combat"] = "Not in combat.";
             _strings["combat_spell_mode_on"] = "Spell mode.";
             _strings["combat_spell_mode_off"] = "Spell mode ended.";
             _strings["combat_spell_cast"] = "{0} casts {1}.";
-            _strings["combat_enemy_damaged"] = "{0} damage to enemy. {1} HP left.";
+            _strings["combat_enemy_damaged"] = "{0} damage to enemy. {1} of {2} HP left.";
             _strings["combat_enemy_defeated"] = "{0} defeated!";
             _strings["combat_char_hit"] = "{0} hit! {1} of {2} HP.";
             _strings["combat_char_dead"] = "{0} is dead!";
@@ -182,6 +183,12 @@ namespace CryptmasterAccess
             _strings["combat_char_hp_dead"] = "{0} dead";
             _strings["combat_targeting"] = "targeting {0}";
             _strings["combat_targeting_all"] = "targeting all";
+
+            // ===== LOOT / LEVEL-UP =====
+            _strings["loot_start"] = "Loot! {0}";
+            _strings["loot_assignment"] = "{0} gets {1}";
+            _strings["loot_levelup_start"] = "{0} levels up! Select a letter. Current: {1}.";
+            _strings["loot_levelup_letter"] = "{0}.";
 
             // ===== INVENTORY =====
             _strings["inv_opened"] = "Inventory. {0} tab, {1} items.";
@@ -212,7 +219,7 @@ namespace CryptmasterAccess
             _strings["path_targets_summary"] = "{0} targets found.";
             _strings["path_target_item"] = "{0}: {1}, {2} steps.";
             _strings["path_target_unnamed"] = "{0}, {1} steps.";
-            _strings["path_no_targets"] = "No targets reachable.";
+            _strings["path_no_targets"] = "No targets in current area.";
             _strings["path_route"] = "Route to {0}: {1}";
             _strings["path_no_route"] = "No path found.";
             _strings["path_arrived"] = "Arrived at {0}.";
@@ -228,7 +235,7 @@ namespace CryptmasterAccess
             _strings["path_turn_left"] = "turn left";
             _strings["path_turn_right"] = "turn right";
             _strings["path_turn_around"] = "turn around";
-            _strings["path_no_unexplored"] = "No unexplored rooms reachable.";
+            _strings["path_no_unexplored"] = "No unexplored rooms in current area. Try a door to reach other areas.";
             _strings["path_autowalk_start"] = "Auto-walking {0} steps.";
             _strings["path_autowalk_cancelled"] = "Auto-walk cancelled.";
             _strings["path_autowalk_blocked"] = "Auto-walk blocked.";

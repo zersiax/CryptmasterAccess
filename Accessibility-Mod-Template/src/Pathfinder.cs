@@ -294,8 +294,9 @@ namespace CryptmasterAccess
                 });
             }
 
-            // Container (unopened, interactive only — skip scenery)
+            // Container (unopened, active, interactive only — skip scenery)
             if (piece.myCollectionContainer != null && !piece.myCollectionContainer.hasOpened
+                && piece.myCollectionContainer.gameObject.activeInHierarchy
                 && RoomScanner.IsInteractableContainer(piece.myCollectionContainer))
             {
                 targets.Add(new ReachableTarget
@@ -345,6 +346,26 @@ namespace CryptmasterAccess
                     Distance = distance,
                     Path = path != null ? new List<int>(path) : new List<int>()
                 });
+            }
+
+            // Level transition doors (walls with warpCoverDoor)
+            if (piece.allWalls != null)
+            {
+                foreach (var wall in piece.allWalls)
+                {
+                    if (wall != null && wall.warpCoverDoor != null)
+                    {
+                        targets.Add(new ReachableTarget
+                        {
+                            Piece = piece,
+                            TypeKey = "poi_door",
+                            Name = "",
+                            Distance = distance,
+                            Path = path != null ? new List<int>(path) : new List<int>()
+                        });
+                        break; // One door target per room is enough
+                    }
+                }
             }
         }
 
