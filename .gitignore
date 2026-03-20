@@ -19,8 +19,17 @@ Desktop.ini
 *.user
 *.suo
 
-# Release staging (ZIP is the artifact, staging dirs are temp)
-release/CryptmasterAccess-v*/
+# Release artifacts (built on GitHub)
+release/
+
+# Template files (not part of the mod)
+docs/
+docs-de/
+scripts/
+templates/
+.editorconfig
+CLAUDE.md
+CLAUDE.de.md
 
 # Project status (session-specific)
 project_status.md
