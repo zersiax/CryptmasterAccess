@@ -18,7 +18,7 @@ using HarmonyLib;
 //   See docs/technical-reference.md section "CRITICAL: Accessing Game Code"
 // ============================================================================
 
-[assembly: MelonInfo(typeof(CryptmasterAccess.Main), "CryptmasterAccess", "1.3.0", "Zersiax")]
+[assembly: MelonInfo(typeof(CryptmasterAccess.Main), "CryptmasterAccess", "1.4.0", "Zersiax")]
 [assembly: MelonGame("PaulHartandLeeWilliams", "CryptMaster")]
 
 namespace CryptmasterAccess
@@ -52,6 +52,7 @@ namespace CryptmasterAccess
         private TextInterceptHandler _textInterceptHandler;
         private PathfindHandler _pathfindHandler;
         private WordPuzzleHandler _wordPuzzleHandler;
+        private LootHandler _lootHandler;
 
         /// <summary>
         /// Static reference for Harmony patch callbacks (room).
@@ -92,6 +93,7 @@ namespace CryptmasterAccess
             _textInterceptHandler = new TextInterceptHandler();
             _pathfindHandler = new PathfindHandler();
             _wordPuzzleHandler = new WordPuzzleHandler();
+            _lootHandler = new LootHandler();
             RoomHandlerInstance = _roomHandler;
             CombatHandlerInstance = _combatHandler;
             PathfindHandlerInstance = _pathfindHandler;
@@ -135,6 +137,7 @@ namespace CryptmasterAccess
             _textInterceptHandler.Reset();
             _pathfindHandler.Reset();
             _wordPuzzleHandler.Reset();
+            _lootHandler.Reset();
             _patchesApplied = false;
             _cachedGameManager = null;
 
@@ -229,8 +232,16 @@ namespace CryptmasterAccess
 
             if (Input.GetKeyDown(KeyCode.F5))
             {
-                DebugLogger.LogInput("F5", "Party HP");
-                _combatHandler.AnnouncePartyStatus();
+                if (_combatHandler.IsInCombat())
+                {
+                    DebugLogger.LogInput("F5", "Party HP");
+                    _combatHandler.AnnouncePartyStatus();
+                }
+                else
+                {
+                    DebugLogger.LogInput("F5", "Character letters");
+                    AnnounceCharacterLetters();
+                }
                 return true;
             }
 
@@ -319,6 +330,7 @@ namespace CryptmasterAccess
                     _textInterceptHandler.SetGameManager(_cachedGameManager);
                     _pathfindHandler.SetGameManager(_cachedGameManager);
                     _wordPuzzleHandler.SetGameManager(_cachedGameManager);
+                    _lootHandler.SetGameManager(_cachedGameManager);
                 }
             }
 
@@ -332,6 +344,7 @@ namespace CryptmasterAccess
             _textInterceptHandler.Update();
             _pathfindHandler.Update();
             _wordPuzzleHandler.Update();
+            _lootHandler.Update();
 
             // Apply Harmony patches once GameManager is available
             if (!_patchesApplied && _cachedGameManager != null)
@@ -347,6 +360,82 @@ namespace CryptmasterAccess
         private void AnnounceHelp()
         {
             ScreenReader.Say(Loc.Get("help_text"));
+        }
+
+        #endregion
+
+        #region Character Letters
+
+        /// <summary>
+        /// Announces each character's available letters. Triggered by F5 outside combat.
+        /// </summary>
+        private void AnnounceCharacterLetters()
+        {
+            if (_cachedGameManager == null || _cachedGameManager.allCharacterUI == null)
+            {
+                ScreenReader.Say(Loc.Get("combat_not_in_combat"));
+                return;
+            }
+
+            var sb = new System.Text.StringBuilder();
+
+            foreach (var hud in _cachedGameManager.allCharacterUI)
+            {
+                if (hud == null) continue;
+
+                string name = hud.myName;
+                if (string.IsNullOrEmpty(name)) continue;
+
+                if (sb.Length > 0) sb.Append(" ");
+
+                if (hud.isDead)
+                {
+                    sb.Append(Loc.Get("party_letters_dead", name));
+                    continue;
+                }
+
+                // Each character works on one spell at a time.
+                // Show the current spell word with revealed/blank letters.
+                string spellName = hud.currentSpellName;
+                if (string.IsNullOrEmpty(spellName) || hud.hasNoMoreSkills)
+                {
+                    sb.Append(Loc.Get("party_spell_complete", name));
+                    continue;
+                }
+
+                var letters = new System.Text.StringBuilder();
+                int letterCount = 0;
+                if (hud.allSpellContainers != null && hud.allSpellContainers.Count > 0)
+                {
+                    var spellLetters = hud.allSpellContainers[0].allSpellLetters;
+                    letterCount = spellLetters.Count;
+                    for (int i = 0; i < spellLetters.Count; i++)
+                    {
+                        if (i > 0) letters.Append(", ");
+                        var sl = spellLetters[i];
+                        if (sl != null && sl.hasRevealed &&
+                            !string.IsNullOrEmpty(sl.myBaseText))
+                        {
+                            letters.Append(sl.myBaseText.ToUpper());
+                        }
+                        else
+                        {
+                            letters.Append(Loc.Get("word_puzzle_blank"));
+                        }
+                    }
+                }
+
+                sb.Append(Loc.Get("party_spell_progress", name, letterCount, letters.ToString()));
+            }
+
+            if (sb.Length > 0)
+            {
+                ScreenReader.Say(sb.ToString());
+            }
+            else
+            {
+                ScreenReader.Say(Loc.Get("party_no_characters"));
+            }
         }
 
         #endregion
