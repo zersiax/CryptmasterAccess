@@ -16,6 +16,7 @@ namespace CryptmasterAccess
         // Chest item guessing state
         private bool _wasChestGuessingActive;
         private int _lastChestRevealedCount;
+        private int _lastCounters;
         private string _lastAnnouncement = "";
 
         // World word puzzle state
@@ -53,6 +54,7 @@ namespace CryptmasterAccess
             _gameManager = null;
             _wasChestGuessingActive = false;
             _lastChestRevealedCount = 0;
+            _lastCounters = -1;
             _lastAnnouncement = "";
             _wasWorldWordActive = false;
             _lastWorldWordRevealedCount = 0;
@@ -74,9 +76,10 @@ namespace CryptmasterAccess
             // Check chest guessing first
             if (_gameManager.myCryptMaster != null && _gameManager.myCryptMaster.isChestItemGuessingActive)
             {
+                int counters = _gameManager.myCryptMaster.currentCounters;
                 string state = BuildLetterState(_gameManager.allItemLetters);
-                string announcement = Loc.Get("word_puzzle_letters",
-                    _gameManager.allItemLetters.Count, state);
+                string announcement = Loc.Get("word_puzzle_guesses_left", counters) + " " +
+                    Loc.Get("word_puzzle_letters", _gameManager.allItemLetters.Count, state);
                 _lastAnnouncement = announcement;
                 ScreenReader.Say(announcement);
                 return;
@@ -114,38 +117,57 @@ namespace CryptmasterAccess
             {
                 // Puzzle just started
                 int count = _gameManager.allItemLetters.Count;
+                int counters = _gameManager.myCryptMaster.currentCounters;
                 string state = BuildLetterState(_gameManager.allItemLetters);
-                string announcement = Loc.Get("word_puzzle_start", count) + " " + state;
+                string announcement = Loc.Get("word_puzzle_start", count) + " " +
+                    Loc.Get("word_puzzle_guesses", counters) + " " + state;
                 _lastAnnouncement = announcement;
                 _lastChestRevealedCount = CountRevealed(_gameManager.allItemLetters);
+                _lastCounters = counters;
 
                 DebugLogger.Log(LogCategory.Handler, "WordPuzzle",
-                    $"Chest puzzle started: {count} letters");
+                    $"Chest puzzle started: {count} letters, {counters} guesses");
                 ScreenReader.Say(announcement);
             }
             else if (isActive && _wasChestGuessingActive)
             {
                 // Check for newly revealed letters
                 int currentRevealed = CountRevealed(_gameManager.allItemLetters);
-                if (currentRevealed != _lastChestRevealedCount)
+                int currentCounters = _gameManager.myCryptMaster.currentCounters;
+                bool lettersChanged = currentRevealed != _lastChestRevealedCount;
+                bool countersChanged = currentCounters != _lastCounters;
+
+                if (lettersChanged || countersChanged)
                 {
                     string state = BuildLetterState(_gameManager.allItemLetters);
-                    string announcement = Loc.Get("word_puzzle_letters",
-                        _gameManager.allItemLetters.Count, state);
+                    var sb = new StringBuilder();
+
+                    if (countersChanged && currentCounters >= 0)
+                    {
+                        sb.Append(Loc.Get("word_puzzle_guesses_left", currentCounters));
+                        sb.Append(" ");
+                    }
+
+                    sb.Append(Loc.Get("word_puzzle_letters",
+                        _gameManager.allItemLetters.Count, state));
+
+                    string announcement = sb.ToString();
                     _lastAnnouncement = announcement;
                     _lastChestRevealedCount = currentRevealed;
+                    _lastCounters = currentCounters;
 
                     DebugLogger.Log(LogCategory.Handler, "WordPuzzle",
-                        $"Letters revealed: {currentRevealed}");
+                        $"Puzzle update: {currentRevealed} revealed, {currentCounters} guesses left");
                     ScreenReader.Say(announcement);
                 }
             }
             else if (!isActive && _wasChestGuessingActive)
             {
                 // Puzzle just ended
-                DebugLogger.Log(LogCategory.Handler, "WordPuzzle", "Chest puzzle solved");
+                DebugLogger.Log(LogCategory.Handler, "WordPuzzle", "Chest puzzle ended");
                 ScreenReader.Say(Loc.Get("word_puzzle_solved"));
                 _lastChestRevealedCount = 0;
+                _lastCounters = -1;
             }
 
             _wasChestGuessingActive = isActive;

@@ -72,7 +72,7 @@ namespace CryptmasterAccess
         {
             // ===== GENERAL =====
             _strings["mod_loaded"] = "Cryptmaster Access loaded. F1 for help.";
-            _strings["help_text"] = "Key bindings: F1 Help. F2 Repeat room info. Ctrl+F2 Repeat word puzzle. F3 Repeat menu info. F4 Repeat combat. F5 Party HP. F6 Turn timer. F7 Enemy info. F8 Repeat inventory or brain info. F9 Repeat last notification. Ctrl+F9 Auto-walk to nearest unexplored room. F10 Pathfind, cycle targets, Enter for route. Shift+F10 Toggle GPS. Ctrl+F10 Retrace to junction. Ctrl+PgUp/PgDn cycle categories. PgUp/PgDn cycle items. End for directions. F11 Toggle debug mode.";
+            _strings["help_text"] = "Key bindings: F1 Help. F2 Repeat room info. Ctrl+F2 Repeat word puzzle. F3 Repeat menu info. F4 Repeat combat. F5 Party HP in combat, character letters outside combat. F6 Turn timer. F7 Enemy info. F8 Repeat inventory or brain info. F9 Repeat last notification. Ctrl+F9 Auto-walk to nearest unexplored room. F10 Pathfind, cycle targets, Enter for route. Shift+F10 Toggle GPS. Ctrl+F10 Retrace to junction. Ctrl+PgUp/PgDn cycle categories. PgUp/PgDn cycle items. End for directions. F11 Toggle debug mode.";
             _strings["debug_toggle"] = "Debug mode {0}";
 
             // ===== DIRECTIONS (RELATIVE) =====
@@ -184,10 +184,20 @@ namespace CryptmasterAccess
             _strings["combat_targeting"] = "targeting {0}";
             _strings["combat_targeting_all"] = "targeting all";
 
+            // ===== PARTY / CHARACTER LETTERS =====
+            _strings["party_letters"] = "{0}: {1}.";
+            _strings["party_letters_dead"] = "{0}: dead.";
+            _strings["party_letters_none"] = "{0}: no letters yet.";
+            _strings["party_spell_progress"] = "{0}: {1} letters. {2}";
+            _strings["party_spell_complete"] = "{0}: all skills learned.";
+            _strings["party_no_characters"] = "No characters found.";
+
             // ===== LOOT / LEVEL-UP =====
             _strings["loot_start"] = "Loot! {0}";
+            _strings["loot_screen_start"] = "Select loot letters.";
             _strings["loot_assignment"] = "{0} gets {1}";
-            _strings["loot_levelup_start"] = "{0} levels up! Select a letter. Current: {1}.";
+            _strings["loot_position"] = "{0} of {1}.";
+            _strings["loot_levelup_start"] = "{0} levels up! Select a letter: {1}.";
             _strings["loot_levelup_letter"] = "{0}.";
 
             // ===== INVENTORY =====
@@ -243,6 +253,8 @@ namespace CryptmasterAccess
 
             // ===== WORD PUZZLE =====
             _strings["word_puzzle_start"] = "Word puzzle, {0} letters.";
+            _strings["word_puzzle_guesses"] = "{0} guesses.";
+            _strings["word_puzzle_guesses_left"] = "{0} guesses left.";
             _strings["word_puzzle_letters"] = "{0} letters. {1}";
             _strings["word_puzzle_solved"] = "Word solved.";
             _strings["word_puzzle_blank"] = "blank";

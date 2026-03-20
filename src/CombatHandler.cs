@@ -193,11 +193,11 @@ namespace CryptmasterAccess
         /// </summary>
         public void OnEnemyDamaged(int currentHealth, int damage)
         {
-            int maxHp = 0;
             Enemy enemy = _gameManager != null ? _gameManager.currentlyLoadedEnemy : null;
-            if (enemy != null) maxHp = GetEnemyMaxHP(enemy);
+            int hp = GetEnemyHP(enemy);
+            int maxHp = GetEnemyMaxHP(enemy);
 
-            string msg = Loc.Get("combat_enemy_damaged", damage, currentHealth, maxHp);
+            string msg = Loc.Get("combat_enemy_damaged", damage, hp, maxHp);
             DebugLogger.Log(LogCategory.Handler, "CombatHandler", $"Enemy damaged: {msg}");
             _lastAnnouncement = msg;
             ScreenReader.Say(msg);
@@ -406,7 +406,7 @@ namespace CryptmasterAccess
         /// <summary>
         /// Returns true if currently in combat.
         /// </summary>
-        private bool IsInCombat()
+        public bool IsInCombat()
         {
             return _gameManager != null && _gameManager.currentlyLoadedEnemy != null;
         }
@@ -456,21 +456,38 @@ namespace CryptmasterAccess
         }
 
         /// <summary>
-        /// Gets enemy current HP from Enemy.currentHealth (not letter count, which is visual only).
+        /// Gets enemy current HP by counting non-armour letters still active.
+        /// The actual death condition is allEnemyLettersActive reaching zero non-armour letters,
+        /// NOT Enemy.currentHealth (which is a misleading internal float).
         /// </summary>
         private int GetEnemyHP(Enemy enemy)
         {
-            if (enemy == null) return 0;
-            return Mathf.Max(0, (int)enemy.currentHealth);
+            if (_gameManager == null) return 0;
+            return CountNonArmourLetters(_gameManager.allEnemyLettersActive);
         }
 
         /// <summary>
-        /// Gets enemy max HP from Enemy.totalHealth.
+        /// Gets enemy max HP by counting non-armour letters in the full letter list.
         /// </summary>
         private int GetEnemyMaxHP(Enemy enemy)
         {
-            if (enemy == null) return 0;
-            return (int)enemy.totalHealth;
+            if (_gameManager == null) return 0;
+            return CountNonArmourLetters(_gameManager.allEnemyLetters);
+        }
+
+        /// <summary>
+        /// Counts letters in a NameDefinition list that are not armour elements.
+        /// </summary>
+        private int CountNonArmourLetters(System.Collections.Generic.List<NameDefinition> letters)
+        {
+            if (letters == null) return 0;
+            int count = 0;
+            foreach (var letter in letters)
+            {
+                if (letter != null && letter.myElement != "armour")
+                    count++;
+            }
+            return count;
         }
 
         /// <summary>
